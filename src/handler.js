@@ -2,15 +2,15 @@ const { nanoid } = require('nanoid');
 const Books = require('./data/books');
 const validate = require('./utility/validate');
 
-// @desc    Get all Books
+// @ket     Get all books
 // @route   GET /books
-// @code    200
 const getBooks = (req, hapi) => {
   const { name, reading, finished } = req.query;
 
-  let query = Books.filter();
+  let query = Books;
+
   if (name) {
-    query = query.filter((book) => book.name === name);
+    query = query.filter((book) => book.name.includes(name));
   }
   if (reading) {
     query = query.filter((book) => book.reading === reading);
@@ -29,9 +29,8 @@ const getBooks = (req, hapi) => {
   return res;
 };
 
-// @desc    Get single book
+// @ket     Get single book
 // @route   GET /books/{bookId}
-// @code    200/404
 const getBook = (req, hapi) => {
   const { bookId } = req.params;
   const book = Books.filter((b) => b.id === bookId)[0];
@@ -55,14 +54,12 @@ const getBook = (req, hapi) => {
     .code(404);
 };
 
-// @desc    Create book
+// @ket     Create book
 // @route   POST /books
-// @code    200/500
 const createBook = (req, hapi) => {
-  const check = validate(req.payload);
-
-  if (!check.status) {
-    return hapi.code(400).response(check);
+  const resValidate = validate('create', req.payload);
+  if (resValidate.status !== 'success') {
+    return hapi.response(resValidate).code(400);
   }
 
   const {
@@ -101,19 +98,99 @@ const createBook = (req, hapi) => {
   const isSuccess = Books.filter((b) => b.id === id).length > 0;
 
   if (!isSuccess) {
-    return hapi.code(500).response({
-      status: 'fail',
-      message: 'Buku gagal ditambahkan',
-    });
+    return hapi
+      .response({
+        status: 'fail',
+        message: 'Buku gagal ditambahkan',
+      })
+      .code(500);
   }
 
-  return hapi.code(200).response({
-    status: 'success',
-    message: 'Buku berhasil ditambahkan',
-    data: {
-      bookId: id,
-    },
+  return hapi
+    .response({
+      status: 'success',
+      message: 'Buku berhasil ditambahkan',
+      data: {
+        bookId: id,
+      },
+    })
+    .code(200);
+};
+
+// @ket     Update book
+// @route   PUT /books/{bookId}
+const updateBook = (req, hapi) => {
+  const resValidate = validate('update', req.payload);
+  if (resValidate.status !== 'success') {
+    return hapi.response(resValidate).code(400);
+  }
+
+  const { bookId } = req.params;
+  const {
+    name,
+    year,
+    author,
+    summary,
+    publisher,
+    pageCount,
+    readPage,
+    reading,
+  } = req.payload;
+  const updatedAt = new Date().toISOString();
+
+  const i = Books.findIndex((book) => book.id === bookId);
+
+  if (i !== -1) {
+    Books[i] = {
+      ...Books[i],
+      name,
+      year,
+      author,
+      summary,
+      publisher,
+      pageCount,
+      readPage,
+      reading,
+      updatedAt,
+    };
+
+    return hapi
+      .response({
+        status: 'success',
+        message: 'Buku berhasil diperbarui',
+      })
+      .code(200);
+  }
+
+  return hapi.response({
+    status: 'fail',
+    message: 'Gagal memperbarui buku. Id tidak ditemukan',
   });
 };
 
-module.exports = { getBooks, getBook, createBook };
+// @ket     Delete book
+// @route   DELETE /books/{bookId}
+const deleteBook = (req, hapi) => {
+  const { bookId } = req.params;
+
+  const i = Books.findIndex((book) => book.id === bookId);
+
+  if (i !== -1) {
+    Books.splice([i], 1);
+
+    return hapi
+      .response({
+        status: 'success',
+        message: 'Buku berhasil dihapus',
+      })
+      .code(200);
+  }
+
+  return hapi
+    .response({
+      status: 'fail',
+      message: 'Buku gagal dihapus, Id buku tidak ditemukan',
+    })
+    .code(404);
+};
+module.exports = { getBooks, getBook, createBook, updateBook, deleteBook };

@@ -1,4 +1,4 @@
-const validate = (req) => {
+const validate = (act, req) => {
   const { name, year, pageCount, readPage } = req;
 
   const res = {
@@ -7,18 +7,23 @@ const validate = (req) => {
 
   if (!name) {
     res.status = 'fail';
-    res.message = 'Gagal menambahkan buku. Mohon isi nama buku';
+    res.message = `Gagal ${
+      act === 'create' ? 'menambahkan' : 'memperbarui'
+    } buku. Mohon isi nama buku`;
   }
 
-  if (!year.length <= 4 || typeof year !== 'number') {
+  if (!/^\d{4}$/.test(year)) {
     res.status = 'fail';
-    res.message = 'Gagal menambahkan buku. Mohon isi tahun buku dengan benar';
+    res.message = `Gagal ${
+      act === 'create' ? 'menambahkan' : 'memperbarui'
+    } buku. Mohon isi tahun buku dengan benar`;
   }
 
   if (readPage > pageCount) {
     res.status = 'fail';
-    res.message =
-      'Gagal menambahkan buku. readPage tidak boleh lebih besar dari pageCount';
+    res.message = `Gagal ${
+      act === 'create' ? 'menambahkan' : 'memperbarui'
+    } buku. readPage tidak boleh lebih besar dari pageCount`;
   }
 
   return res;
