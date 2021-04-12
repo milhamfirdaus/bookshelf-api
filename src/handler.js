@@ -1,9 +1,11 @@
+/* eslint-disable no-shadow */
 /* eslint-disable eqeqeq */
+
 const { nanoid } = require('nanoid');
 const Books = require('./data/books');
 const validate = require('./utility/validate');
 
-// @ket     Get all books
+// @desc     Get all books
 // @route   GET /books
 const getBooks = (req, hapi) => {
   const { name, reading, finished } = req.query;
@@ -11,7 +13,7 @@ const getBooks = (req, hapi) => {
   let query = Books;
 
   if (name) {
-    query = query.filter((book) => book.name.includes(name));
+    query = query.filter((book) => book.name.toLowerCase().includes(name.toLowerCase()));
   }
   if (reading) {
     query = query.filter((book) => book.reading == reading);
@@ -19,6 +21,11 @@ const getBooks = (req, hapi) => {
   if (finished) {
     query = query.filter((book) => book.finished == finished);
   }
+
+  query = query.map((book) => {
+    const { id, name, publisher } = book;
+    return { id, name, publisher };
+  });
 
   const res = hapi.response({
     status: 'success',
@@ -30,7 +37,7 @@ const getBooks = (req, hapi) => {
   return res;
 };
 
-// @ket     Get single book
+// @desc     Get single book
 // @route   GET /books/{bookId}
 const getBook = (req, hapi) => {
   const { bookId } = req.params;
@@ -55,7 +62,7 @@ const getBook = (req, hapi) => {
     .code(404);
 };
 
-// @ket     Create book
+// @desc     Create book
 // @route   POST /books
 const createBook = (req, hapi) => {
   const resValidate = validate('create', req.payload);
@@ -118,7 +125,7 @@ const createBook = (req, hapi) => {
     .code(201);
 };
 
-// @ket     Update book
+// @desc     Update book
 // @route   PUT /books/{bookId}
 const updateBook = (req, hapi) => {
   const resValidate = validate('update', req.payload);
@@ -166,10 +173,10 @@ const updateBook = (req, hapi) => {
   return hapi.response({
     status: 'fail',
     message: 'Gagal memperbarui buku. Id tidak ditemukan',
-  });
+  }).code(404);
 };
 
-// @ket     Delete book
+// @desc     Delete book
 // @route   DELETE /books/{bookId}
 const deleteBook = (req, hapi) => {
   const { bookId } = req.params;
@@ -190,7 +197,7 @@ const deleteBook = (req, hapi) => {
   return hapi
     .response({
       status: 'fail',
-      message: 'Buku gagal dihapus, Id buku tidak ditemukan',
+      message: 'Buku gagal dihapus. Id tidak ditemukan',
     })
     .code(404);
 };
