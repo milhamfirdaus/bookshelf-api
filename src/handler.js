@@ -1,3 +1,4 @@
+/* eslint-disable eqeqeq */
 const { nanoid } = require('nanoid');
 const Books = require('./data/books');
 const validate = require('./utility/validate');
@@ -13,10 +14,10 @@ const getBooks = (req, hapi) => {
     query = query.filter((book) => book.name.includes(name));
   }
   if (reading) {
-    query = query.filter((book) => book.reading === reading);
+    query = query.filter((book) => book.reading == reading);
   }
   if (finished) {
-    query = query.filter((book) => book.finished === finished);
+    query = query.filter((book) => book.finished == finished);
   }
 
   const res = hapi.response({
@@ -114,7 +115,7 @@ const createBook = (req, hapi) => {
         bookId: id,
       },
     })
-    .code(200);
+    .code(201);
 };
 
 // @ket     Update book
@@ -193,4 +194,11 @@ const deleteBook = (req, hapi) => {
     })
     .code(404);
 };
-module.exports = { getBooks, getBook, createBook, updateBook, deleteBook };
+
+module.exports = {
+  getBooks,
+  getBook,
+  createBook,
+  updateBook,
+  deleteBook,
+};

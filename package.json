@@ -4,10 +4,10 @@
   "description": "",
   "main": "server.js",
   "scripts": {
-    "dev": "nodemon ./src/server"
+    "start": "nodemon ./src/server"
   },
   "keywords": [],
-  "author": "",
+  "author": "Muhamad Ilham Firdaus",
   "license": "ISC",
   "devDependencies": {
     "eslint": "^7.24.0",
